@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>
+		Video's
+	</title>
+	<style>
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	html {
+		-webkit-font-smoothing: antialiased;
+
+	}
+	body{
+		font-family: Arial;
+		font-weight: 100;
+	}
+	.wrapper{
+		width:960px;
+		min-height:100%;
+		margin:0px auto;
+	}
+	aside{
+		width:30%;
+		float: left;
+	}
+	section.timeline{
+		width:70%;
+		float:right;
+	}
+
+	.thumb{
+		text-decoration: none;
+		display: block;
+		background-color: white;
+		padding-top:5px;
+		padding-bottom:5px;
+		margin:20px;
+		box-shadow: 0px 0px 10px 0px #CCC;
+	}
+	.thumb:hover{
+		box-shadow: 0px 0px 20px 0px #AAA;
+	}
+	.thumb h1{
+		font-weight: 200;
+		font-size: 1em;
+		margin: 0.5em;
+
+		color:#555;
+	}
+	.thumb h2{
+		text-align:right;
+		font-weight: 100;
+		font-size: 0.8em;
+		margin: 0.5em;
+		color:#555;
+	}
+	.thumb img{
+		width:100%;
+	}
+	
+	</style>
+</head>
+<body>
+	<div class="wrapper">
+		<aside>
+			Hallo
+		</aside>
+		<section class="timeline">
+			<div id="listview">
+			</div>
+		</section>
+	</div>
+	<script src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
+	<script src="quantize.js"></script>
+	<script src="color-thief.js"></script>
+	<script src="jquery.timeago.js" type="text/javascript"></script>
+	<script>
+	function sortByKey(array, key) {
+		return array.sort(function(a, b) {
+			var x = a[key];
+			var y = b[key];
+			return ((x > y) ? -1 : ((x < y) ? 1 : 0));
+		});
+	}
+	$(document).ready(function(){
+		$.get("http://192.168.1.100:8080/video/", function(data){
+			var videos=data.videos;
+			var videos = sortByKey(videos, 'lastSeen');
+			$.each(videos, function(x,y){
+				var date=new Date(y.lastSeen);
+				if(data.lastSeen == data.added){
+					var parseDate = "last seen <strong>"+$.timeago(y.lastSeen)+"</strong>";
+				}else{
+					var parseDate = "added <strong>"+$.timeago(y.lastSeen)+"</strong>";
+				}
+
+				$("#listview").append("<div class=\"thumb\" id=\""+y.id+"\"><h2>"+parseDate+"</h2><div class=\"list-thumb\"><img src=\"http://192.168.1.100:8080"+y.thumbs[1].url+"\"/></div><h1>"+y.name+"</h1></div>");
+				$("#"+y.id).click(function(e){
+					e.preventDefault();
+
+					var videoLink=$(this).attr("href");
+					var width=$(this).find("img").width();
+					var height=$(this).find("img").height();
+					$(this).unbind("click").find(".list-thumb").html("<video width=\""+width+"px\" height=\""+height+"px\" controls autoplay><source src=\""+y.link+"\" type=\"video/mp4\"/></video>");
+				});
+			});
+		});
+	});
+	</script>
+</body>
+</html>
